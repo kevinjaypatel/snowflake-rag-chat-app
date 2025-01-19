@@ -16,11 +16,12 @@ class RAG_from_scratch:
         """
         return self.retriever.retrieve(query)
 
-    @instrument
-    def generate_completion(self, query: str, context_str: list) -> str:
+    # @instrument
+    def generate_completion_with_context(self, query: str, context_str: dict, model_name: str = "mistral-large2") -> str:
         """
         Generate answer from context.
         """
+        
         prompt = f"""
           You are an expert assistant extracting information from context provided.
           Answer the question based on the context. Be concise and do not hallucinate.
@@ -30,7 +31,14 @@ class RAG_from_scratch:
           {query}
           Answer:
         """
-        return Complete("mistral-large", prompt)
+        return Complete(model_name, prompt)
+    
+    # @instrument
+    def generate_completion(self, prompt: str, model_name: str = "mistral-large2") -> str:
+        """
+        Generate answer from prompt.
+        """
+        return Complete(model_name, prompt)
 
     @instrument
     def query(self, query: str) -> str:
