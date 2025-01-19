@@ -9,12 +9,12 @@ class RAG_from_scratch:
     def __init__(self, snowpark_session: Session):
         self.retriever = CortexSearchRetriever(snowpark_session=snowpark_session, limit_to_retrieve=4)
 
-    @instrument
-    def retrieve_context(self, query: str) -> list:
+    # @instrument
+    def retrieve_context(self, query: str, filter_obj: dict = None) -> dict:
         """
         Retrieve relevant text from vector store.
         """
-        return self.retriever.retrieve(query)
+        return self.retriever.retrieve(query, filter_obj)
 
     # @instrument
     def generate_completion_with_context(self, query: str, context_str: dict, model_name: str = "mistral-large2") -> str:

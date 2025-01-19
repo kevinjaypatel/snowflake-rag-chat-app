@@ -11,23 +11,33 @@ class CortexSearchRetriever:
         self._snowpark_session = snowpark_session
         self._limit_to_retrieve = limit_to_retrieve
 
-    def retrieve(self, query: str) -> List[str]:
+    def retrieve(self, query: str, filter_obj: dict = None) -> dict:
         root = Root(self._snowpark_session)
         cortex_search_service = (
             root.databases[os.getenv("SNOWFLAKE_DATABASE")]
             .schemas[os.getenv("SNOWFLAKE_SCHEMA")]
             .cortex_search_services[os.getenv("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
         )
-        resp = cortex_search_service.search(
-            query=query,
-            columns=["chunk", "relative_path", "category"],
-            limit=self._limit_to_retrieve,
-        )
-
-        if resp.results:
-            return [curr["chunk"] for curr in resp.results]
+        resp = None
+        if filter_obj:
+            resp = cortex_search_service.search(
+                query=query,
+                columns=["chunk", "relative_path", "category"],
+                filter=filter_obj,
+                limit=self._limit_to_retrieve,
+            )
         else:
-            return []
+            resp = cortex_search_service.search(
+                query=query,
+                columns=["chunk", "relative_path", "category"],
+                limit=self._limit_to_retrieve,
+            )
+
+        return resp.json()
+        # if resp.results:
+        #     return [curr["chunk"] for curr in resp.results]
+        # else:
+        #     return []
    
 if __name__ == "__main__":
     try: 
@@ -36,7 +46,7 @@ if __name__ == "__main__":
         query = "What is the rust programming language?"
         retrieved_context = retriever.retrieve(query)
 
-        print(len(retrieved_context))
+        print(retrieved_context)
 
     except Exception as e:
         print("Connection failed:", str(e))
