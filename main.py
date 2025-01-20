@@ -12,7 +12,7 @@ from rag_feedback import f_context_relevance
 pd.set_option("max_colwidth",None)
 
 ### Default Values
-NUM_CHUNKS = 5 # Num-chunks provided as context. Play with this to check how it affects your accuracy
+NUM_CHUNKS = 4 # Num-chunks provided as context. Play with this to check how it affects your accuracy
 slide_window = 7 # How many last conversations to remember
 
 # Connection to Snowflake
@@ -43,6 +43,9 @@ def config_options():
     st.sidebar.expander("Session State").write(st.session_state)
 
 def init_messages():
+
+    if "clear_conversation" not in st.session_state:
+        st.session_state.clear_conversation = False
 
     # Initialize chat history
     if st.session_state.clear_conversation or "messages" not in st.session_state:
