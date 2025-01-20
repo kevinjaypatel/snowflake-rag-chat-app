@@ -3,20 +3,21 @@ from search import CortexSearchRetriever
 
 from snowflake.snowpark.session import Session
 from snowflake.cortex import Complete
+from trulens.apps.custom import instrument
 
 class RAG_from_scratch:
 
     def __init__(self, snowpark_session: Session, num_chunks: int = 4):
         self.retriever = CortexSearchRetriever(snowpark_session=snowpark_session, limit_to_retrieve=num_chunks)
 
-    # @instrument
+    @instrument
     def retrieve_context(self, query: str, filter_obj: dict = None) -> dict:
         """
         Retrieve relevant text from vector store.
         """
         return self.retriever.retrieve(query, filter_obj)
 
-    # @instrument
+    @instrument
     def generate_completion_with_context(self, query: str, context_str: dict, model_name: str = "mistral-large2") -> str:
         """
         Generate answer from context.
@@ -33,7 +34,7 @@ class RAG_from_scratch:
         """
         return Complete(model_name, prompt)
     
-    # @instrument
+    @instrument
     def generate_completion(self, prompt: str, model_name: str = "mistral-large2") -> str:
         """
         Generate answer from prompt.
@@ -41,7 +42,7 @@ class RAG_from_scratch:
         return Complete(model_name, prompt)
 
     
-    # @instrument
+    @instrument
     def query(self, query: str) -> str:
         context_str = self.retrieve_context(query)
         return self.generate_completion_with_context(query, context_str)

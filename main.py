@@ -6,6 +6,9 @@ import json
 from snowflake_setup import get_snowpark_session
 from rag import RAG_from_scratch
 
+from rag_feedback import f_context_relevance
+
+
 pd.set_option("max_colwidth",None)
 
 ### Default Values
@@ -14,9 +17,6 @@ slide_window = 7 # How many last conversations to remember
 
 # Connection to Snowflake
 snowpark_session = get_snowpark_session() 
-
-# LLM as a judge evaluations 
-# provider = Cortex(snowpark_session, "mistral-large2")
 
 # RAG 
 rag = RAG_from_scratch(snowpark_session=snowpark_session, num_chunks=NUM_CHUNKS)
@@ -122,11 +122,16 @@ def answer_question(myquestion):
             filter_obj = {"@eq": {"category": st.session_state.category_value} }
             prompt_context = rag.retrieve_context(myquestion, filter_obj)
 
-        # TODO: add trulens context relevance check 
-
-        json_data = json.loads(prompt_context)
-        relative_paths = set(item['relative_path'] for item in json_data['results'])
-        response = rag.generate_completion_with_context(myquestion, prompt_context)
+        relative_paths = []
+        response = None
+        context_relevance_score = f_context_relevance(prompt_context, myquestion)
+        
+        if context_relevance_score == 0:
+            response = "I don't have the information to answer your question"
+        else:         
+            json_data = json.loads(prompt_context)
+            relative_paths = set(item['relative_path'] for item in json_data['results'])
+            response = rag.generate_completion_with_context(myquestion, prompt_context)
     
         return response, relative_paths
     except Exception as e:
