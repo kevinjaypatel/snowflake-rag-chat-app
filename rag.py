@@ -24,7 +24,7 @@ class RAG_from_scratch:
         """
         
         prompt = f"""
-          You are helping a developer learn the Rust programming language. Exract the information from context provided, 
+          You are helping a developer learn the Rust programming language. Extract the information from the context provided, 
           and answer the question based on the context. Be concise and do not hallucinate. 
           If you don´t have the information just say so. Please provide examples and code snippets when possible.
           Context: {context_str}
